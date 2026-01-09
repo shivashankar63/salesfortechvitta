@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Users, TrendingUp, DollarSign, Activity, Target, Zap, ArrowUpRight, Loader } from "lucide-react";
 import StatsCard from "@/components/dashboard/StatsCard";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
@@ -6,7 +7,7 @@ import OwnerLeadsOverview from "@/components/dashboard/OwnerLeadsOverview";
 import TeamPerformance from "@/components/dashboard/TeamPerformance";
 import RevenueChart from "@/components/dashboard/RevenueChart";
 import { Card } from "@/components/ui/card";
-import { getLeads, getUsers } from "@/lib/supabase";
+import { getLeads, getUsers, getCurrentUser, getUserById } from "@/lib/supabase";
 
 const OwnerDashboard = () => {
   const [stats, setStats] = useState([
@@ -50,10 +51,25 @@ const OwnerDashboard = () => {
     },
   ]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        // Check user role first
+        const currentUser = await getCurrentUser();
+        if (!currentUser) {
+          navigate('/login', { replace: true });
+          return;
+        }
+        
+        const { data: userData } = await getUserById(currentUser.id);
+        if (userData?.role !== 'owner') {
+          const roleRoutes = { manager: '/manager', salesman: '/salesman' };
+          navigate(roleRoutes[userData?.role as 'manager' | 'salesman'] || '/login', { replace: true });
+          return;
+        }
+
         const [leadsRes, usersRes] = await Promise.all([
           getLeads(),
           getUsers(),
@@ -121,7 +137,7 @@ const OwnerDashboard = () => {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [navigate]);
 
   // Dynamic calculations for Key Insights
   const calculateInsights = () => {

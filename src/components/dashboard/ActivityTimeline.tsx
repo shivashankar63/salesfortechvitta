@@ -84,34 +84,34 @@ const ActivityTimeline = () => {
 
   if (loading) {
     return (
-      <div className="bg-card rounded-xl shadow-soft p-6 animate-slide-up">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Recent Activity</h2>
-        <div className="flex items-center justify-center py-12">
-          <Loader className="w-6 h-6 animate-spin text-primary mr-2" />
-          <span className="text-muted-foreground">Loading activities...</span>
+      <div className="bg-white rounded-lg shadow-sm p-4 border border-slate-200">
+        <h2 className="text-base font-semibold text-slate-900 mb-3">Recent Activity</h2>
+        <div className="flex items-center justify-center py-8">
+          <Loader className="w-5 h-5 animate-spin text-slate-900 mr-2" />
+          <span className="text-sm text-slate-600">Loading...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-card rounded-xl shadow-soft p-6 animate-slide-up">
-      <h2 className="text-xl font-semibold text-foreground mb-4">Recent Activity</h2>
-      <div className="space-y-4">
+    <div className="bg-white rounded-lg shadow-sm p-4 border border-slate-200">
+      <h2 className="text-base font-semibold text-slate-900 mb-3">Recent Activity</h2>
+      <div className="space-y-3">
         {activities.length > 0 ? (
           activities.map((activity) => (
-            <div key={activity.id} className="flex gap-3 pb-3 border-b border-border last:border-0 last:pb-0">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${getActivityColor(activity.type)}`}>
+            <div key={activity.id} className="flex gap-2.5 pb-2.5 border-b border-slate-100 last:border-0 last:pb-0">
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${getActivityColor(activity.type)}`}>
                 {getActivityIcon(activity.type)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{activity.title}</p>
-                <p className="text-xs text-muted-foreground">{formatTime(activity.created_at)}</p>
+                <p className="text-xs font-medium text-slate-900 truncate">{activity.title}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{formatTime(activity.created_at)}</p>
               </div>
             </div>
           ))
         ) : (
-          <p className="text-center text-muted-foreground text-sm py-4">No activities yet</p>
+          <p className="text-center text-slate-500 text-xs py-6">No activities yet</p>
         )}
       </div>
     </div>

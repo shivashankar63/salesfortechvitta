@@ -46,7 +46,6 @@ const getMenuItems = (role: "owner" | "manager" | "salesman") => {
     { icon: LineChart, label: "Analytics", path: "/analytics" },
     { icon: Briefcase, label: "Regions", path: "/regions" },
     { icon: PieChart, label: "Revenue Reports", path: "/revenue" },
-    { icon: Settings, label: "Organization", path: "/settings" },
   ];
 
   const managerItems = [
@@ -62,7 +61,6 @@ const getMenuItems = (role: "owner" | "manager" | "salesman") => {
     ...baseItems,
     { icon: Phone, label: "My Leads", path: "/sales/my-leads" },
     { icon: Target, label: "Pipeline", path: "/sales/pipeline" },
-    { icon: Settings, label: "Settings", path: "/settings" },
   ];
 
   if (role === "owner") return ownerItems;

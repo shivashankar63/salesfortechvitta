@@ -1,29 +1,90 @@
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Target, Clock, CheckCircle2, Loader } from "lucide-react";
-import { getLeads, getCurrentUser } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Loader,
+  Phone,
+  Mail,
+  DollarSign,
+  Calendar,
+  Building2,
+  User,
+  TrendingUp,
+  Search,
+  Filter,
+  MoreVertical,
+  CheckCircle,
+  XCircle,
+  Clock,
+  ArrowUpRight,
+} from "lucide-react";
+import { getLeads, getCurrentUser, getUserById, updateLead } from "@/lib/supabase";
+import { formatDistanceToNow } from "date-fns";
 
-type StageKey = "new" | "qualified" | "negotiation" | "won" | "lost";
+type StageKey = "new" | "qualified" | "proposal" | "closed_won" | "not_interested";
 
-const stageMeta: Record<StageKey, { label: string; sla: string; progress: number }> = {
-  new: { label: "New", sla: "24h", progress: 20 },
-  qualified: { label: "Qualified", sla: "48h", progress: 45 },
-  negotiation: { label: "Negotiation", sla: "5d", progress: 70 },
-  won: { label: "Won", sla: "-", progress: 100 },
-  lost: { label: "Lost", sla: "-", progress: 0 },
+const stageMeta: Record<StageKey, { label: string; color: string; description: string }> = {
+  new: {
+    label: "New Leads",
+    color: "blue",
+    description: "Fresh opportunities to pursue",
+  },
+  qualified: {
+    label: "Qualified",
+    color: "purple",
+    description: "Vetted and engaged prospects",
+  },
+  proposal: {
+    label: "Proposal Sent",
+    color: "amber",
+    description: "Awaiting decision",
+  },
+  closed_won: {
+    label: "Closed",
+    color: "emerald",
+    description: "Successfully closed deals",
+  },
+  not_interested: {
+    label: "Archived",
+    color: "slate",
+    description: "Declined or inactive",
+  },
 };
 
 const SalesPipeline = () => {
   const [loading, setLoading] = useState(true);
   const [leads, setLeads] = useState<any[]>([]);
+  const [selectedStage, setSelectedStage] = useState<StageKey>("new");
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const user = await getCurrentUser();
+        if (!user) {
+          navigate('/login', { replace: true });
+          return;
+        }
+
+        const { data: userData } = await getUserById(user.id);
+        if (userData?.role !== 'salesman') {
+          const roleRoutes = { owner: '/owner', manager: '/manager' };
+          navigate(roleRoutes[userData?.role as 'owner' | 'manager'] || '/login', { replace: true });
+          return;
+        }
+
         const { data } = await getLeads(user ? { assignedTo: user.id } : undefined);
         setLeads(data || []);
       } catch (error) {
@@ -33,21 +94,21 @@ const SalesPipeline = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const stages = useMemo(() => {
-    const grouped: Record<StageKey, { leads: number; value: number }> = {
-      new: { leads: 0, value: 0 },
-      qualified: { leads: 0, value: 0 },
-      negotiation: { leads: 0, value: 0 },
-      won: { leads: 0, value: 0 },
-      lost: { leads: 0, value: 0 },
+    const grouped: Record<StageKey, { leads: any[]; value: number }> = {
+      new: { leads: [], value: 0 },
+      qualified: { leads: [], value: 0 },
+      proposal: { leads: [], value: 0 },
+      closed_won: { leads: [], value: 0 },
+      not_interested: { leads: [], value: 0 },
     };
 
     leads.forEach((lead: any) => {
       const key = (lead.status || "new") as StageKey;
       if (!grouped[key]) return;
-      grouped[key].leads += 1;
+      grouped[key].leads.push(lead);
       grouped[key].value += lead.value || 0;
     });
 
@@ -56,64 +117,319 @@ const SalesPipeline = () => {
       name: stageMeta[key].label,
       leads: grouped[key].leads,
       value: grouped[key].value,
-      sla: stageMeta[key].sla,
-      progress: stageMeta[key].progress,
+      color: stageMeta[key].color,
+      description: stageMeta[key].description,
     }));
   }, [leads]);
 
+  const filteredLeads = useMemo(() => {
+    const stageLeads = stages.find(s => s.key === selectedStage)?.leads || [];
+    if (!searchQuery) return stageLeads;
+    
+    return stageLeads.filter(lead =>
+      lead.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lead.contact_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lead.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [stages, selectedStage, searchQuery]);
+
   const totalValue = stages.reduce((s, st) => s + st.value, 0);
+  const totalLeads = leads.length;
+  const activeDeals = leads.filter(l => !["closed_won", "not_interested"].includes(l.status)).length;
+
+  const moveToStage = async (leadId: string, newStage: StageKey) => {
+    try {
+      await updateLead(leadId, { status: newStage });
+      setLeads((prev) =>
+        prev.map((lead) =>
+          lead.id === leadId ? { ...lead, status: newStage } : lead
+        )
+      );
+    } catch (error) {
+      console.error("Error moving lead:", error);
+    }
+  };
+
+  const getStageColor = (color: string) => {
+    const colors: Record<string, { bg: string; text: string; border: string; badge: string }> = {
+      blue: { bg: "bg-blue-50", text: "text-blue-900", border: "border-blue-200", badge: "bg-blue-600" },
+      purple: { bg: "bg-purple-50", text: "text-purple-900", border: "border-purple-200", badge: "bg-purple-600" },
+      amber: { bg: "bg-amber-50", text: "text-amber-900", border: "border-amber-200", badge: "bg-amber-600" },
+      emerald: { bg: "bg-emerald-50", text: "text-emerald-900", border: "border-emerald-200", badge: "bg-emerald-600" },
+      slate: { bg: "bg-slate-50", text: "text-slate-900", border: "border-slate-200", badge: "bg-slate-600" },
+    };
+    return colors[color] || colors.blue;
+  };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="flex min-h-screen bg-slate-50">
       <DashboardSidebar role="salesman" />
       <main className="flex-1 p-4 lg:p-8 pt-20 sm:pt-16 lg:pt-8 overflow-auto">
         {loading ? (
           <div className="flex items-center justify-center min-h-[50vh]">
-            <div className="text-center text-slate-300 flex flex-col items-center gap-3">
-              <Loader className="w-10 h-10 animate-spin text-orange-400" />
-              <span>Loading pipeline...</span>
+            <div className="text-center flex flex-col items-center gap-3">
+              <Loader className="w-10 h-10 animate-spin text-slate-900" />
+              <span className="text-slate-600">Loading pipeline...</span>
             </div>
           </div>
         ) : (
           <>
-            <div className="mb-8 flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-white">Pipeline</h1>
-                <p className="text-slate-400">Track where every deal stands</p>
-              </div>
-              <Badge className="bg-orange-500/20 text-orange-200 border-orange-500/40">
-                Total ${totalValue.toLocaleString()}
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {stages.map((stage) => (
-                <Card key={stage.key} className="p-4 bg-white/5 border-white/10">
-                  <div className="flex items-start justify-between mb-3">
+            {/* Header with Stats */}
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-slate-900 mb-4">Sales Pipeline</h1>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <Card className="border-slate-200 bg-white p-4">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-lg font-semibold text-white">{stage.name}</div>
-                      <div className="text-sm text-slate-400">{stage.leads} leads</div>
+                      <p className="text-sm text-slate-600 mb-1">Total Pipeline</p>
+                      <p className="text-2xl font-bold text-slate-900">${totalValue.toLocaleString()}</p>
                     </div>
-                    <Badge className="bg-orange-500/15 text-orange-200 border-orange-500/40">
-                      ${stage.value.toLocaleString()}
-                    </Badge>
+                    <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <DollarSign className="w-6 h-6 text-blue-600" />
+                    </div>
                   </div>
-
-                  <div className="space-y-2 text-sm text-slate-300 mb-4">
-                    <div className="flex items-center gap-2"><Target className="w-4 h-4 text-orange-400" /> Momentum: {stage.progress}%</div>
-                    <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-orange-400" /> SLA: {stage.sla}</div>
-                    {stage.key === "won" && (
-                      <div className="flex items-center gap-2 text-green-400"><CheckCircle2 className="w-4 h-4" /> Closed won</div>
-                    )}
-                    {stage.key === "lost" && (
-                      <div className="flex items-center gap-2 text-red-300"><CheckCircle2 className="w-4 h-4" /> Closed lost</div>
-                    )}
-                  </div>
-
-                  <Progress value={stage.progress} className="h-2" />
                 </Card>
-              ))}
+
+                <Card className="border-slate-200 bg-white p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-600 mb-1">Active Deals</p>
+                      <p className="text-2xl font-bold text-slate-900">{activeDeals}</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                      <TrendingUp className="w-6 h-6 text-purple-600" />
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="border-slate-200 bg-white p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-600 mb-1">Total Leads</p>
+                      <p className="text-2xl font-bold text-slate-900">{totalLeads}</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <Building2 className="w-6 h-6 text-emerald-600" />
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Search */}
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Input
+                  placeholder="Search leads by company, contact, or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white border-slate-200"
+                />
+              </div>
             </div>
+
+            {/* Stage Tabs */}
+            <Tabs value={selectedStage} onValueChange={(v) => setSelectedStage(v as StageKey)}>
+              <TabsList className="bg-white border border-slate-200 p-1 mb-6">
+                {stages.map((stage) => {
+                  const colors = getStageColor(stage.color);
+                  return (
+                    <TabsTrigger
+                      key={stage.key}
+                      value={stage.key}
+                      className="data-[state=active]:bg-slate-900 data-[state=active]:text-white"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>{stage.name}</span>
+                        <Badge variant="secondary" className="ml-1">
+                          {stage.leads.length}
+                        </Badge>
+                      </div>
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+
+              {stages.map((stage) => {
+                const colors = getStageColor(stage.color);
+                return (
+                  <TabsContent key={stage.key} value={stage.key} className="mt-0">
+                    {/* Stage Header */}
+                    <Card className={`${colors.bg} border ${colors.border} p-4 mb-4`}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h2 className={`text-lg font-semibold ${colors.text}`}>{stage.name}</h2>
+                          <p className="text-sm text-slate-600">{stage.description}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-slate-900">${stage.value.toLocaleString()}</p>
+                          <p className="text-sm text-slate-600">{stage.leads.length} {stage.leads.length === 1 ? 'deal' : 'deals'}</p>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Leads Grid */}
+                    {filteredLeads.length === 0 ? (
+                      <Card className="border-slate-200 p-12 text-center">
+                        <p className="text-slate-500">
+                          {searchQuery ? "No leads match your search" : "No leads in this stage"}
+                        </p>
+                      </Card>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {filteredLeads.map((lead: any) => (
+                          <Card key={lead.id} className="border-slate-200 bg-white hover:shadow-lg transition-shadow">
+                            <div className="p-5">
+                              {/* Lead Header */}
+                              <div className="flex items-start justify-between mb-4">
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-slate-900 text-lg mb-1 truncate">
+                                    {lead.company_name || "Unnamed Company"}
+                                  </h3>
+                                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                                    <User className="w-4 h-4" />
+                                    <span>{lead.contact_name || "No contact"}</span>
+                                  </div>
+                                </div>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <MoreVertical className="w-4 h-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    {stage.key === "new" && (
+                                      <>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "qualified")}>
+                                          <CheckCircle className="w-4 h-4 mr-2" /> Mark as Qualified
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "proposal")}>
+                                          <ArrowUpRight className="w-4 h-4 mr-2" /> Send Proposal
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "closed_won")}>
+                                          <CheckCircle className="w-4 h-4 mr-2 text-emerald-600" /> Close Deal
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "not_interested")}>
+                                          <XCircle className="w-4 h-4 mr-2 text-rose-600" /> Archive Lead
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+                                    {stage.key === "qualified" && (
+                                      <>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "proposal")}>
+                                          <ArrowUpRight className="w-4 h-4 mr-2" /> Send Proposal
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "closed_won")}>
+                                          <CheckCircle className="w-4 h-4 mr-2 text-emerald-600" /> Close Deal
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "new")}>
+                                          <ArrowUpRight className="w-4 h-4 mr-2" /> Move to New
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "not_interested")}>
+                                          <XCircle className="w-4 h-4 mr-2 text-rose-600" /> Archive Lead
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+                                    {stage.key === "proposal" && (
+                                      <>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "closed_won")}>
+                                          <CheckCircle className="w-4 h-4 mr-2 text-emerald-600" /> Close Deal
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "qualified")}>
+                                          <ArrowUpRight className="w-4 h-4 mr-2" /> Move to Qualified
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "not_interested")}>
+                                          <XCircle className="w-4 h-4 mr-2 text-rose-600" /> Archive Lead
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+                                    {stage.key === "closed_won" && (
+                                      <>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "proposal")}>
+                                          <ArrowUpRight className="w-4 h-4 mr-2" /> Move to Proposal
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "qualified")}>
+                                          <ArrowUpRight className="w-4 h-4 mr-2" /> Move to Qualified
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "not_interested")}>
+                                          <XCircle className="w-4 h-4 mr-2 text-rose-600" /> Archive Lead
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+                                    {stage.key === "not_interested" && (
+                                      <>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "new")}>
+                                          <ArrowUpRight className="w-4 h-4 mr-2" /> Reactivate to New
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "qualified")}>
+                                          <ArrowUpRight className="w-4 h-4 mr-2" /> Move to Qualified
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "proposal")}>
+                                          <ArrowUpRight className="w-4 h-4 mr-2" /> Move to Proposal
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => moveToStage(lead.id, "closed_won")}>
+                                          <CheckCircle className="w-4 h-4 mr-2 text-emerald-600" /> Close Deal
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+
+                              {/* Deal Value */}
+                              <div className={`inline-flex items-center gap-2 ${colors.badge} text-white px-3 py-1.5 rounded-lg mb-4`}>
+                                <DollarSign className="w-4 h-4" />
+                                <span className="font-semibold">${(lead.value || 0).toLocaleString()}</span>
+                              </div>
+
+                              {/* Contact Info */}
+                              <div className="space-y-2 mb-4">
+                                {lead.email && (
+                                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                                    <Mail className="w-4 h-4 text-slate-400" />
+                                    <a href={`mailto:${lead.email}`} className="hover:text-slate-900 truncate">
+                                      {lead.email}
+                                    </a>
+                                  </div>
+                                )}
+                                {lead.phone && (
+                                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                                    <Phone className="w-4 h-4 text-slate-400" />
+                                    <a href={`tel:${lead.phone}`} className="hover:text-slate-900">
+                                      {lead.phone}
+                                    </a>
+                                  </div>
+                                )}
+                                {lead.created_at && (
+                                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                                    <Clock className="w-4 h-4 text-slate-400" />
+                                    <span>Added {formatDistanceToNow(new Date(lead.created_at), { addSuffix: true })}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Quick Actions */}
+                              <div className="flex gap-2 pt-3 border-t border-slate-100">
+                                <Button variant="outline" size="sm" className="flex-1" asChild>
+                                  <a href={`tel:${lead.phone || ''}`}>
+                                    <Phone className="w-4 h-4 mr-1" /> Call
+                                  </a>
+                                </Button>
+                                <Button variant="outline" size="sm" className="flex-1" asChild>
+                                  <a href={`mailto:${lead.email || ''}`}>
+                                    <Mail className="w-4 h-4 mr-1" /> Email
+                                  </a>
+                                </Button>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
           </>
         )}
       </main>

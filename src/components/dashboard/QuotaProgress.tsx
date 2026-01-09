@@ -59,44 +59,44 @@ const QuotaProgress = () => {
 
   if (loading) {
     return (
-      <div className="bg-card rounded-xl shadow-soft p-6 animate-slide-up">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Quota Progress</h2>
-        <div className="flex items-center justify-center py-12">
-          <Loader className="w-6 h-6 animate-spin text-primary mr-2" />
-          <span className="text-muted-foreground">Loading quota data...</span>
+      <div className="bg-white rounded-lg shadow-sm p-4 border border-slate-200">
+        <h2 className="text-base font-semibold text-slate-900 mb-3">Quota Progress</h2>
+        <div className="flex items-center justify-center py-8">
+          <Loader className="w-5 h-5 animate-spin text-slate-900 mr-2" />
+          <span className="text-sm text-slate-600">Loading...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-card rounded-xl shadow-soft p-6 animate-slide-up">
-      <h2 className="text-xl font-semibold text-foreground mb-4">Quota Progress</h2>
+    <div className="bg-white rounded-lg shadow-sm p-4 border border-slate-200">
+      <h2 className="text-base font-semibold text-slate-900 mb-3">Quota Progress</h2>
       
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Main Progress */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-foreground">Monthly Target</span>
-            <Badge className="bg-primary/20 text-primary border-0">{percentage.toFixed(0)}%</Badge>
+            <span className="text-xs font-medium text-slate-700">Monthly Target</span>
+            <Badge className="bg-slate-900 text-white border-0 text-xs px-2 py-0.5">{percentage.toFixed(0)}%</Badge>
           </div>
-          <Progress value={Math.min(percentage, 100)} className="h-3" />
-          <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+          <Progress value={Math.min(percentage, 100)} className="h-2" />
+          <div className="flex items-center justify-between mt-1.5 text-xs text-slate-600">
             <span>${(quota.achieved / 1000).toFixed(0)}K / ${(quota.target / 1000).toFixed(0)}K</span>
-            <span>${(Math.max(0, quota.target - quota.achieved) / 1000).toFixed(0)}K remaining</span>
+            <span className="text-slate-500">${(Math.max(0, quota.target - quota.achieved) / 1000).toFixed(0)}K left</span>
           </div>
         </div>
 
         {/* Daily Target */}
-        <div className="p-3 rounded-lg bg-muted/50 border border-border">
-          <p className="text-xs text-muted-foreground mb-1">Daily Target for Next {quota.daysLeft} Days</p>
-          <p className="text-lg font-semibold text-foreground">${(dailyTarget / 1000).toFixed(1)}K/day</p>
+        <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+          <p className="text-xs text-slate-600 mb-1">Daily Target · Next {quota.daysLeft} Days</p>
+          <p className="text-lg font-bold text-slate-900">${(dailyTarget / 1000).toFixed(1)}K/day</p>
         </div>
 
         {/* Status */}
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${isOnTrack ? 'bg-success' : 'bg-warning'}`} />
-          <span className="text-sm text-foreground">
+          <div className={`w-2 h-2 rounded-full ${isOnTrack ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+          <span className="text-xs text-slate-700">
             {isOnTrack ? 'On track to achieve quota' : 'Need to increase pace'}
           </span>
         </div>

@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, Loader, Briefcase, Users, TrendingUp, DollarSign, Target, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpRight, ArrowDownRight, Activity } from "lucide-react";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getCurrentUser, getProjects, createProject, getLeads, getUsers } from "@/lib/supabase";
+import { getCurrentUser, getProjects, createProject, getLeads, getUsers, getUserById } from "@/lib/supabase";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -17,13 +18,21 @@ const ManagerDashboard = () => {
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [projectForm, setProjectForm] = useState({ name: "", description: "", budget: "" });
   const [creatingProject, setCreatingProject] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const user = await getCurrentUser();
         if (!user) {
-          setLoading(false);
+          navigate('/login', { replace: true });
+          return;
+        }
+
+        const { data: userData } = await getUserById(user.id);
+        if (userData?.role !== 'manager') {
+          const roleRoutes = { owner: '/owner', salesman: '/salesman' };
+          navigate(roleRoutes[userData?.role as 'owner' | 'salesman'] || '/login', { replace: true });
           return;
         }
 
@@ -46,7 +55,7 @@ const ManagerDashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handleCreateProject = async () => {
     if (!projectForm.name) return;

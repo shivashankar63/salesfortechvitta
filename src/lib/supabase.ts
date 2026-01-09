@@ -196,7 +196,7 @@ export const updateUser = async (id: string, updates: any) => {
 
 export const getLeads = async (filters?: { status?: string; assignedTo?: string; projectId?: string }) => {
   try {
-    let query = supabase.from('leads').select('*');
+    let query = supabase.from('leads').select('*, projects(name)');
     
     if (filters?.status) query = query.eq('status', filters.status);
     if (filters?.assignedTo) query = query.eq('assigned_to', filters.assignedTo);
