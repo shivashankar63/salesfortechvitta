@@ -233,31 +233,61 @@ if (loading) {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
-            <div className="text-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-200">
+            <div 
+              className="text-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/manager/leads?status=new");
+              }}
+            >
               <div className="w-3 h-3 rounded-full bg-slate-400 mx-auto mb-2"></div>
               <p className="text-xl sm:text-2xl font-semibold text-slate-900">{newLeads}</p>
               <p className="text-xs font-medium text-slate-600 mt-1">New</p>
               <p className="text-xs text-slate-500 mt-1">${(leads.filter(l => l.status === 'new').reduce((sum, l) => sum + (l.value || 0), 0) / 1000).toFixed(0)}K</p>
             </div>
-            <div className="text-center p-3 sm:p-4 rounded-lg bg-blue-50 border border-blue-200">
+            <div 
+              className="text-center p-3 sm:p-4 rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 hover:border-blue-300 transition-all cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/manager/leads?status=qualified");
+              }}
+            >
               <div className="w-3 h-3 rounded-full bg-blue-500 mx-auto mb-2"></div>
               <p className="text-xl sm:text-2xl font-semibold text-slate-900">{qualifiedLeads}</p>
               <p className="text-xs font-medium text-blue-700 mt-1">Qualified</p>
               <p className="text-xs text-slate-500 mt-1">${(leads.filter(l => l.status === 'qualified').reduce((sum, l) => sum + (l.value || 0), 0) / 1000).toFixed(0)}K</p>
             </div>
-            <div className="text-center p-3 sm:p-4 rounded-lg bg-orange-50 border border-orange-200">
+            <div 
+              className="text-center p-3 sm:p-4 rounded-lg bg-orange-50 border border-orange-200 hover:bg-orange-100 hover:border-orange-300 transition-all cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/manager/leads?status=negotiation");
+              }}
+            >
               <div className="w-3 h-3 rounded-full bg-orange-500 mx-auto mb-2"></div>
               <p className="text-xl sm:text-2xl font-semibold text-slate-900">{negotiationLeads}</p>
               <p className="text-xs font-medium text-orange-700 mt-1">Negotiation</p>
               <p className="text-xs text-slate-500 mt-1">${(leads.filter(l => l.status === 'negotiation').reduce((sum, l) => sum + (l.value || 0), 0) / 1000).toFixed(0)}K</p>
             </div>
-            <div className="text-center p-3 sm:p-4 rounded-lg bg-green-50 border border-green-200">
+            <div 
+              className="text-center p-3 sm:p-4 rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 hover:border-green-300 transition-all cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/manager/leads?status=won");
+              }}
+            >
               <div className="w-3 h-3 rounded-full bg-green-500 mx-auto mb-2"></div>
               <p className="text-xl sm:text-2xl font-semibold text-slate-900">{wonLeads}</p>
               <p className="text-xs font-medium text-green-700 mt-1">Won</p>
               <p className="text-xs text-slate-500 mt-1">${(totalRevenue / 1000).toFixed(0)}K</p>
             </div>
-            <div className="text-center p-3 sm:p-4 rounded-lg bg-red-50 border border-red-200">
+            <div 
+              className="text-center p-3 sm:p-4 rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 hover:border-red-300 transition-all cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/manager/leads?status=lost");
+              }}
+            >
               <div className="w-3 h-3 rounded-full bg-red-500 mx-auto mb-2"></div>
               <p className="text-xl sm:text-2xl font-semibold text-slate-900">{lostLeads}</p>
               <p className="text-xs font-medium text-red-700 mt-1">Lost</p>

@@ -87,6 +87,14 @@ const ManagerLeads = () => {
     fetchData();
   }, []);
 
+  // Read status filter from URL params
+  useEffect(() => {
+    const statusParam = searchParams.get("status");
+    if (statusParam && ["new", "qualified", "negotiation", "won", "lost", "proposal", "closed_won", "not_interested"].includes(statusParam)) {
+      setStatusFilter(statusParam);
+    }
+  }, [searchParams]);
+
   // If a leadId is present in the URL, open that lead's modal when data is available
   useEffect(() => {
     const paramId = searchParams.get("leadId");
