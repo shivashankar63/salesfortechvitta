@@ -163,3 +163,40 @@
     transform: scale(1);
   }
 }
+
+/* Smooth scroll and dialog fixes */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-y: scroll;
+}
+
+/* Prevent scroll jumping when dialog opens */
+body[data-radix-dialog-content-open] {
+  overflow: hidden;
+}
+
+/* Ensure dialogs are scrollable on small screens */
+[role="dialog"] {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+[role="dialog"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+[role="dialog"]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[role="dialog"]::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 3px;
+}
+
+[role="dialog"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}

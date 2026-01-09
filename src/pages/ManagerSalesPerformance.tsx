@@ -292,12 +292,12 @@ const ManagerSalesPerformance = () => {
 
         {/* Details Modal */}
         <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
-          <DialogContent className="sm:max-w-2xl bg-slate-950">
+          <DialogContent className="sm:max-w-2xl bg-slate-950 max-h-[90vh] overflow-y-auto">
             <DialogHeader className="border-b border-slate-800 pb-4">
               <DialogTitle className="text-xl text-white">Performance Details</DialogTitle>
             </DialogHeader>
             {selectedSalesman && (
-              <div className="space-y-6">
+              <div className="space-y-6 pb-4">
                 {/* Header */}
                 <div className="pb-4 border-b border-slate-800 bg-gradient-to-r from-purple-950/30 to-blue-950/30 p-4 rounded-lg">
                   <div className="flex items-start justify-between gap-4">
