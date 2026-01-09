@@ -107,17 +107,17 @@ if (loading) {
     <div className="flex min-h-screen bg-slate-50">
       <DashboardSidebar role="manager" />
       
-      <main className="flex-1 p-4 lg:p-8 pt-20 sm:pt-16 lg:pt-8 overflow-auto bg-slate-50">
+      <main className="flex-1 p-3 sm:p-4 lg:p-8 pt-20 sm:pt-16 lg:pt-8 overflow-auto bg-slate-50">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-slate-900 mb-1">Dashboard</h1>
-          <p className="text-slate-600">Welcome back! Here's what's happening today.</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 mb-1">Dashboard</h1>
+          <p className="text-sm sm:text-base text-slate-600">Welcome back! Here's what's happening today.</p>
         </div>
 
         {/* Key Metrics - Clean Cards (now clickable) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card
-            className="p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+            className="p-4 sm:p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               navigate("/manager/sales-performance");
@@ -126,7 +126,7 @@ if (loading) {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-slate-600 mb-1">Total Revenue</p>
-                <p className="text-3xl font-semibold text-slate-900">${(totalRevenue / 1000).toFixed(0)}K</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-slate-900">${(totalRevenue / 1000).toFixed(0)}K</p>
                 <div className="flex items-center gap-1 mt-2">
                   <ArrowUpRight className="w-4 h-4 text-green-600" />
                   <span className="text-sm font-medium text-green-600">12.5%</span>
@@ -140,7 +140,7 @@ if (loading) {
           </Card>
 
           <Card
-            className="p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+            className="p-4 sm:p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               navigate("/manager/leads");
@@ -149,7 +149,7 @@ if (loading) {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-slate-600 mb-1">Active Leads</p>
-                <p className="text-3xl font-semibold text-slate-900">{totalLeads}</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{totalLeads}</p>
                 <div className="flex items-center gap-1 mt-2">
                   <ArrowUpRight className="w-4 h-4 text-blue-600" />
                   <span className="text-sm font-medium text-blue-600">8.2%</span>
@@ -163,7 +163,7 @@ if (loading) {
           </Card>
 
           <Card
-            className="p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+            className="p-4 sm:p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               navigate("/manager/performance");
@@ -172,7 +172,7 @@ if (loading) {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-slate-600 mb-1">Win Rate</p>
-                <p className="text-3xl font-semibold text-slate-900">{winRate}%</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{winRate}%</p>
                 <div className="flex items-center gap-1 mt-2">
                   <ArrowUpRight className="w-4 h-4 text-purple-600" />
                   <span className="text-sm font-medium text-purple-600">4.3%</span>
@@ -186,7 +186,7 @@ if (loading) {
           </Card>
 
           <Card
-            className="p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+            className="p-4 sm:p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               navigate("/manager/projects");
@@ -195,7 +195,7 @@ if (loading) {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-slate-600 mb-1">Active Projects</p>
-                <p className="text-3xl font-semibold text-slate-900">{projects.length}</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{projects.length}</p>
                 <div className="flex items-center gap-1 mt-2">
                   <Activity className="w-4 h-4 text-orange-600" />
                   <span className="text-sm font-medium text-orange-600">{projects.filter(p => p.status === 'active').length}</span>
@@ -210,20 +210,20 @@ if (loading) {
         </div>
 
         {/* Pipeline Overview - Clean Segmented Design */}
-        <Card className="p-6 bg-white border-slate-200 shadow-sm mb-8">
-          <div className="flex items-center justify-between mb-6">
+        <Card className="p-4 sm:p-6 bg-white border-slate-200 shadow-sm mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">Lead Pipeline</h2>
               <p className="text-sm text-slate-600 mt-1">Track your deals through each stage</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-slate-600">Total Pipeline Value</p>
-              <p className="text-2xl font-semibold text-slate-900">${(totalPipeline / 1000).toFixed(0)}K</p>
+            <div className="text-left sm:text-right">
+              <p className="text-xs sm:text-sm text-slate-600">Total Pipeline Value</p>
+              <p className="text-xl sm:text-2xl font-semibold text-slate-900">${(totalPipeline / 1000).toFixed(0)}K</p>
             </div>
           </div>
           
           {/* Pipeline Progress Bar */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <div className="flex h-3 rounded-full overflow-hidden bg-slate-100">
               <div className="bg-slate-400" style={{ width: `${totalLeads > 0 ? (newLeads / totalLeads) * 100 : 0}%` }}></div>
               <div className="bg-blue-500" style={{ width: `${totalLeads > 0 ? (qualifiedLeads / totalLeads) * 100 : 0}%` }}></div>
@@ -232,34 +232,34 @@ if (loading) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="text-center p-4 rounded-lg bg-slate-50 border border-slate-200">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-200">
               <div className="w-3 h-3 rounded-full bg-slate-400 mx-auto mb-2"></div>
-              <p className="text-2xl font-semibold text-slate-900">{newLeads}</p>
+              <p className="text-xl sm:text-2xl font-semibold text-slate-900">{newLeads}</p>
               <p className="text-xs font-medium text-slate-600 mt-1">New</p>
               <p className="text-xs text-slate-500 mt-1">${(leads.filter(l => l.status === 'new').reduce((sum, l) => sum + (l.value || 0), 0) / 1000).toFixed(0)}K</p>
             </div>
-            <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-blue-50 border border-blue-200">
               <div className="w-3 h-3 rounded-full bg-blue-500 mx-auto mb-2"></div>
-              <p className="text-2xl font-semibold text-slate-900">{qualifiedLeads}</p>
+              <p className="text-xl sm:text-2xl font-semibold text-slate-900">{qualifiedLeads}</p>
               <p className="text-xs font-medium text-blue-700 mt-1">Qualified</p>
               <p className="text-xs text-slate-500 mt-1">${(leads.filter(l => l.status === 'qualified').reduce((sum, l) => sum + (l.value || 0), 0) / 1000).toFixed(0)}K</p>
             </div>
-            <div className="text-center p-4 rounded-lg bg-orange-50 border border-orange-200">
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-orange-50 border border-orange-200">
               <div className="w-3 h-3 rounded-full bg-orange-500 mx-auto mb-2"></div>
-              <p className="text-2xl font-semibold text-slate-900">{negotiationLeads}</p>
+              <p className="text-xl sm:text-2xl font-semibold text-slate-900">{negotiationLeads}</p>
               <p className="text-xs font-medium text-orange-700 mt-1">Negotiation</p>
               <p className="text-xs text-slate-500 mt-1">${(leads.filter(l => l.status === 'negotiation').reduce((sum, l) => sum + (l.value || 0), 0) / 1000).toFixed(0)}K</p>
             </div>
-            <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-green-50 border border-green-200">
               <div className="w-3 h-3 rounded-full bg-green-500 mx-auto mb-2"></div>
-              <p className="text-2xl font-semibold text-slate-900">{wonLeads}</p>
+              <p className="text-xl sm:text-2xl font-semibold text-slate-900">{wonLeads}</p>
               <p className="text-xs font-medium text-green-700 mt-1">Won</p>
               <p className="text-xs text-slate-500 mt-1">${(totalRevenue / 1000).toFixed(0)}K</p>
             </div>
-            <div className="text-center p-4 rounded-lg bg-red-50 border border-red-200">
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-red-50 border border-red-200">
               <div className="w-3 h-3 rounded-full bg-red-500 mx-auto mb-2"></div>
-              <p className="text-2xl font-semibold text-slate-900">{lostLeads}</p>
+              <p className="text-xl sm:text-2xl font-semibold text-slate-900">{lostLeads}</p>
               <p className="text-xs font-medium text-red-700 mt-1">Lost</p>
               <p className="text-xs text-slate-500 mt-1">${(leads.filter(l => l.status === 'lost').reduce((sum, l) => sum + (l.value || 0), 0) / 1000).toFixed(0)}K</p>
             </div>
@@ -267,10 +267,10 @@ if (loading) {
         </Card>
 
         {/* Projects & Team Side by Side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
           {/* Projects */}
-          <Card className="p-6 bg-white border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
+          <Card className="p-4 sm:p-6 bg-white border-slate-200 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">Projects</h2>
                 <p className="text-sm text-slate-600 mt-1">{projects.length} active projects</p>
@@ -285,11 +285,11 @@ if (loading) {
               </Button>
             </div>
             {projects.length > 0 ? (
-              <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+              <div className="space-y-3 max-h-80 sm:max-h-96 overflow-y-auto pr-1 sm:pr-2">
                 {projects.map((project) => (
                   <div
                     key={project.id}
-                    className="p-4 rounded-lg border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer group"
+                    className="p-3 sm:p-4 rounded-lg border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer group"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
@@ -334,13 +334,13 @@ if (loading) {
           </Card>
 
           {/* Sales Team */}
-          <Card className="p-6 bg-white border-slate-200 shadow-sm">
+          <Card className="p-4 sm:p-6 bg-white border-slate-200 shadow-sm">
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-slate-900">Sales Team</h2>
               <p className="text-sm text-slate-600 mt-1">{salesTeam.length} team members</p>
             </div>
             {salesTeam.length > 0 ? (
-              <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+              <div className="space-y-3 max-h-80 sm:max-h-96 overflow-y-auto pr-1 sm:pr-2">
                 {salesTeam.map((member: any) => {
                   const memberLeads = leads.filter(l => l.assigned_to === member.id);
                   const memberRevenue = memberLeads.filter(l => l.status === 'won').reduce((sum, l) => sum + (l.value || 0), 0);
@@ -352,7 +352,7 @@ if (loading) {
                       className="p-4 rounded-lg border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-base sm:text-lg flex-shrink-0">
                           {(member.full_name || member.email || 'U').charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -362,7 +362,7 @@ if (loading) {
                           <p className="text-sm text-slate-600 truncate">{member.email}</p>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-lg font-semibold text-slate-900">${(memberRevenue / 1000).toFixed(0)}K</p>
+                          <p className="text-base sm:text-lg font-semibold text-slate-900">${(memberRevenue / 1000).toFixed(0)}K</p>
                           <p className="text-xs text-slate-600">{memberWon} won • {memberLeads.length} total</p>
                         </div>
                       </div>
@@ -383,17 +383,17 @@ if (loading) {
         </div>
 
         {/* Recent Leads */}
-        <Card className="p-6 bg-white border-slate-200 shadow-sm">
-          <div className="mb-6">
+        <Card className="p-4 sm:p-6 bg-white border-slate-200 shadow-sm">
+            <div className="mb-4 sm:mb-6">
             <h2 className="text-lg font-semibold text-slate-900">Recent Leads</h2>
             <p className="text-sm text-slate-600 mt-1">Latest updates from your pipeline</p>
           </div>
-          {leads.length > 0 ? (
+            {leads.length > 0 ? (
             <div className="space-y-2">
               {leads.slice(0, 5).map((lead) => (
                 <div 
                   key={lead.id} 
-                  className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer group"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer group"
                 >
                   <div className="flex-1">
                     <h3 className="font-medium text-slate-900 group-hover:text-slate-700 mb-1">
@@ -401,7 +401,7 @@ if (loading) {
                     </h3>
                     <p className="text-sm text-slate-600">{lead.contact_name}</p>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-between gap-3 sm:gap-4">
                     <Badge className={
                       lead.status === 'won' ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-50' :
                       lead.status === 'lost' ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-50' :
