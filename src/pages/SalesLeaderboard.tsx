@@ -14,7 +14,7 @@ const SalesLeaderboard = () => {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
       <DashboardSidebar role="salesman" />
-      <main className="flex-1 p-4 lg:p-8 pt-16 lg:pt-8 overflow-auto">
+      <main className="flex-1 p-4 lg:p-8 pt-20 sm:pt-16 lg:pt-8 overflow-auto">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Leaderboard</h1>
@@ -62,3 +62,5 @@ const SalesLeaderboard = () => {
 };
 
 export default SalesLeaderboard;
+
+

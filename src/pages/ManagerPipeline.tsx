@@ -101,7 +101,7 @@ const ManagerPipeline = () => {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <DashboardSidebar role="manager" />
-      <main className="flex-1 p-4 lg:p-8 pt-16 lg:pt-8 overflow-auto">
+      <main className="flex-1 p-4 lg:p-8 pt-20 sm:pt-16 lg:pt-8 overflow-auto">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <div>
@@ -180,3 +180,5 @@ const ManagerPipeline = () => {
 };
 
 export default ManagerPipeline;
+
+

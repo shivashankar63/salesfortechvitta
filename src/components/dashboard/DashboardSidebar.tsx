@@ -205,7 +205,7 @@ const DashboardSidebar = ({ role }: SidebarProps) => {
         variant="ghost"
         size="icon"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="fixed top-4 left-4 z-50 lg:hidden bg-card shadow-soft"
+        className="fixed top-4 left-4 z-50 lg:hidden bg-card shadow-soft text-foreground hover:bg-card/80"
       >
         {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </Button>
@@ -213,7 +213,7 @@ const DashboardSidebar = ({ role }: SidebarProps) => {
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden transition-opacity"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -231,11 +231,19 @@ const DashboardSidebar = ({ role }: SidebarProps) => {
       {/* Mobile Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col bg-sidebar w-64 transition-transform duration-300 lg:hidden",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-sidebar w-64 shadow-lg transition-transform duration-300 ease-in-out lg:hidden",
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <SidebarContent />
+        <button
+          onClick={() => setIsMobileOpen(false)}
+          className="absolute top-4 right-4 p-2 hover:bg-sidebar-accent rounded-lg lg:hidden"
+        >
+          <X className="w-5 h-5 text-sidebar-foreground" />
+        </button>
+        <div className="mt-12">
+          <SidebarContent />
+        </div>
       </aside>
     </>
   );

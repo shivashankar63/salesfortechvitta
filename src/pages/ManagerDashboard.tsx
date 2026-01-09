@@ -98,7 +98,7 @@ if (loading) {
     <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <DashboardSidebar role="manager" />
       
-      <main className="flex-1 p-4 lg:p-8 pt-16 lg:pt-8 overflow-auto">
+      <main className="flex-1 p-4 lg:p-8 pt-20 sm:pt-16 lg:pt-8 overflow-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-white mb-2">Manager Dashboard</h1>
           <p className="text-slate-300">Complete overview of projects, leads, and team performance</p>
@@ -378,3 +378,5 @@ if (loading) {
 };
 
 export default ManagerDashboard;
+
+

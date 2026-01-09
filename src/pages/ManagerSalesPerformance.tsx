@@ -135,7 +135,7 @@ const ManagerSalesPerformance = () => {
     <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <DashboardSidebar role="manager" />
 
-      <main className="flex-1 p-2 sm:p-4 lg:p-8 pt-16 lg:pt-8 overflow-auto">
+      <main className="flex-1 p-2 sm:p-4 lg:p-8 pt-20 sm:pt-16 lg:pt-8 overflow-auto">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg">Sales Performance Dashboard</h1>
           <p className="text-sm sm:text-base text-white/90 drop-shadow">Monitor team performance, quotas, and pipeline metrics</p>
@@ -402,3 +402,5 @@ const ManagerSalesPerformance = () => {
 };
 
 export default ManagerSalesPerformance;
+
+

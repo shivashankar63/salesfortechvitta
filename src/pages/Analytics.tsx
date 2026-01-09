@@ -85,7 +85,7 @@ const Analytics = () => {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <DashboardSidebar role="owner" />
-      <main className="flex-1 p-4 lg:p-8 pt-16 lg:pt-8 overflow-auto">
+      <main className="flex-1 p-4 lg:p-8 pt-20 sm:pt-16 lg:pt-8 overflow-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Analytics</h1>
           <p className="text-slate-400">Deep insights into your sales performance</p>
@@ -241,3 +241,5 @@ const Analytics = () => {
 };
 
 export default Analytics;
+
+
