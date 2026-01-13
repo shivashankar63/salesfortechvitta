@@ -43,7 +43,7 @@ const SalesmanLeadsTable = () => {
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [editingStatus, setEditingStatus] = useState("");
   const [noteText, setNoteText] = useState("");
-  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateLoadingId, setUpdateLoadingId] = useState<string | null>(null);
   const [updateMessage, setUpdateMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
@@ -214,6 +214,14 @@ const SalesmanLeadsTable = () => {
     setShowEditModal(true);
   };
 
+  // New: handleChangeStatusClick to ensure status is set correctly
+  const handleChangeStatusClick = (lead: Lead) => {
+    setSelectedLead(lead);
+    setEditingStatus(lead.status);
+    setUpdateMessage(null);
+    setShowEditModal(true);
+  };
+
   const handleAddNote = (lead: Lead) => {
     setSelectedLead(lead);
     setNoteText("");
@@ -224,7 +232,7 @@ const SalesmanLeadsTable = () => {
   const handleUpdateLead = async () => {
     if (!selectedLead) return;
     
-    setUpdateLoading(true);
+    setUpdateLoadingId(selectedLead.id);
     setUpdateMessage(null);
 
     try {
@@ -255,7 +263,7 @@ const SalesmanLeadsTable = () => {
     } catch (error: any) {
       setUpdateMessage({ type: "error", text: error.message });
     } finally {
-      setUpdateLoading(false);
+      setUpdateLoadingId(null);
     }
   };
 
@@ -265,7 +273,7 @@ const SalesmanLeadsTable = () => {
       return;
     }
     
-    setUpdateLoading(true);
+    setUpdateLoadingId(selectedLead.id);
     setUpdateMessage(null);
 
     try {
@@ -295,7 +303,7 @@ const SalesmanLeadsTable = () => {
     } catch (error: any) {
       setUpdateMessage({ type: "error", text: error.message });
     } finally {
-      setUpdateLoading(false);
+      setUpdateLoadingId(null);
     }
   };
 
@@ -514,34 +522,48 @@ const SalesmanLeadsTable = () => {
                     </td>
                     <td className="py-2 px-3">{getStatusBadge(lead.status)}</td>
                     <td className="py-2 px-3">
-                      <select
-                        className="bg-white border border-slate-300 rounded px-2 py-1 text-xs"
-                        value={lead.status}
-                        onClick={e => e.stopPropagation()}
-                        onChange={async e => {
-                          e.stopPropagation();
-                          const { updateLead, getLeads, getCurrentUser } = await import("@/lib/supabase");
-                          const value = e.target.value;
-                          const result = await updateLead(lead.id, { status: value });
-                          if (result.error) {
-                            alert('Failed to update status: ' + (result.error.message || result.error));
-                            return;
-                          }
-                          // Refetch only this user's leads to ensure UI is in sync
-                          const user = await getCurrentUser();
-                          if (user) {
-                            const { data } = await getLeads();
-                            const userLeads = (data || []).filter((l: any) => l.assigned_to === user.id);
-                            setLeads(userLeads);
-                          }
-                        }}
-                      >
-                        <option value="new">New</option>
-                        <option value="qualified">Qualified</option>
-                        <option value="proposal">Proposal</option>
-                        <option value="closed_won">Closed Won</option>
-                        <option value="not_interested">Not Interested</option>
-                      </select>
+                      <div style={{ position: 'relative' }}>
+                        <select
+                          className="bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                          value={lead.status}
+                          disabled={updateLoadingId === lead.id}
+                          onClick={e => e.stopPropagation()}
+                          onChange={async e => {
+                            e.stopPropagation();
+                            setUpdateLoadingId(lead.id);
+                            setUpdateMessage(null);
+                            try {
+                              const value = e.target.value;
+                              const { error } = await supabase
+                                .from("leads")
+                                .update({ status: value })
+                                .eq("id", lead.id);
+                              if (error) {
+                                setUpdateMessage({ type: "error", text: error.message });
+                                return;
+                              }
+                              setLeads(prevLeads => prevLeads.map(l => l.id === lead.id ? { ...l, status: value } : l));
+                              setUpdateMessage({ type: "success", text: "Status updated successfully!" });
+                            } catch (err) {
+                              setUpdateMessage({ type: "error", text: 'Exception: ' + (err?.message || err) });
+                              console.error('Update status exception:', err);
+                            } finally {
+                              setUpdateLoadingId(null);
+                            }
+                          }}
+                        >
+                          <option value="new">New</option>
+                          <option value="qualified">Qualified</option>
+                          <option value="proposal">Proposal</option>
+                          <option value="closed_won">Closed Won</option>
+                          <option value="not_interested">Not Interested</option>
+                        </select>
+                        {updateLoadingId === lead.id && (
+                          <span style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)' }}>
+                            <Loader className="animate-spin w-4 h-4 text-slate-400" />
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-2 px-3 text-right text-xs font-semibold text-slate-900">
                       ${(lead.value / 1000).toFixed(0)}K
@@ -575,7 +597,7 @@ const SalesmanLeadsTable = () => {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleEditClick(lead)}>Edit Lead</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleViewDetails(lead)}>View Details</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditClick(lead)}>Change Status</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleChangeStatusClick(lead)}>Change Status</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleAddNote(lead)}>Add Note</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -686,15 +708,15 @@ const SalesmanLeadsTable = () => {
             <Button 
               variant="outline" 
               onClick={() => setShowEditModal(false)}
-              disabled={updateLoading}
+              disabled={updateLoadingId === selectedLead?.id}
             >
               Cancel
             </Button>
             <Button 
               onClick={handleUpdateLead}
-              disabled={updateLoading}
+              disabled={updateLoadingId === selectedLead?.id}
             >
-              {updateLoading ? "Updating..." : "Update Lead"}
+              {updateLoadingId === selectedLead?.id ? "Updating..." : "Update Lead"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -733,15 +755,15 @@ const SalesmanLeadsTable = () => {
             <Button 
               variant="outline" 
               onClick={() => setShowNoteModal(false)}
-              disabled={updateLoading}
+              disabled={updateLoadingId === selectedLead?.id}
             >
               Cancel
             </Button>
             <Button 
               onClick={handleAddNoteSubmit}
-              disabled={updateLoading}
+              disabled={updateLoadingId === selectedLead?.id}
             >
-              {updateLoading ? "Adding..." : "Add Note"}
+              {updateLoadingId === selectedLead?.id ? "Adding..." : "Add Note"}
             </Button>
           </DialogFooter>
         </DialogContent>
