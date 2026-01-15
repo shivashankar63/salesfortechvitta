@@ -122,7 +122,7 @@ if (loading) {
         </div>
 
         {/* Key Metrics - Clean Cards (now clickable) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           <Card
             className="p-4 sm:p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
             onClick={(e) => {
@@ -130,7 +130,7 @@ if (loading) {
               navigate("/manager/sales-performance");
             }}
           >
-            <div className="flex items-start justify-between pointer-events-none">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between pointer-events-none gap-2">
               <div>
                 <p className="text-sm font-medium text-slate-600 mb-1">Total Revenue</p>
                 <p className="text-2xl sm:text-3xl font-semibold text-slate-900">${(totalRevenue / 1000).toFixed(0)}K</p>
@@ -153,7 +153,7 @@ if (loading) {
               navigate("/manager/leads");
             }}
           >
-            <div className="flex items-start justify-between pointer-events-none">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between pointer-events-none gap-2">
               <div>
                 <p className="text-sm font-medium text-slate-600 mb-1">Active Leads</p>
                 <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{totalLeads}</p>
@@ -176,7 +176,7 @@ if (loading) {
               navigate("/manager/performance");
             }}
           >
-            <div className="flex items-start justify-between pointer-events-none">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between pointer-events-none gap-2">
               <div>
                 <p className="text-sm font-medium text-slate-600 mb-1">Win Rate</p>
                 <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{winRate}%</p>
@@ -199,7 +199,7 @@ if (loading) {
               navigate("/manager/projects");
             }}
           >
-            <div className="flex items-start justify-between pointer-events-none">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between pointer-events-none gap-2">
               <div>
                 <p className="text-sm font-medium text-slate-600 mb-1">Active Projects</p>
                 <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{projects.length}</p>

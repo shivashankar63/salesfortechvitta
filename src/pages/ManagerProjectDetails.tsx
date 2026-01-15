@@ -34,7 +34,6 @@ const ManagerProjectDetails = () => {
       setShowEditProjectModal(true);
     };
 
-
     // Handle Edit Project form submission
     const handleEditProject = async () => {
       setEditProjectMessage(null);
@@ -84,7 +83,6 @@ const ManagerProjectDetails = () => {
   const [importingBulk, setImportingBulk] = useState(false);
   const [importStatus, setImportStatus] = useState<{ type: "idle" | "success" | "error"; message: string }>({ type: "idle", message: "" });
 
-
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -121,27 +119,25 @@ const ManagerProjectDetails = () => {
         setActivities(data || []);
       }
     });
-    return (
-      <div className="flex min-h-screen bg-slate-50">
-        <DashboardSidebar role="manager" />
-        <main className="flex-1 p-2 sm:p-4 lg:p-8 pt-16 sm:pt-20 lg:pt-8 overflow-auto bg-slate-50">
-          {/* Project Info Section */}
-          <div className="mb-2 sm:mb-8 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/manager/projects')} className="text-slate-600 hover:text-slate-900">
-                <ArrowLeft className="w-4 h-4 mr-1" /> Back
-              </Button>
-              <h1 className="text-lg sm:text-3xl font-semibold text-slate-900 truncate">{project?.name || "Project"}</h1>
-              <Badge className="ml-2 text-xs sm:text-sm px-2 py-1 bg-slate-100 text-slate-700 border border-slate-200">{project?.status}</Badge>
-            </div>
-            <Button variant="outline" size="sm" className="w-full sm:w-auto mt-2 sm:mt-0" onClick={openEditProjectModal}>
-              <Edit2 className="w-4 h-4 mr-1" /> Edit
-            </Button>
-          </div>
-          {/* ...existing code... */}
-        </main>
-      </div>
-    );
+    return () => {
+      try { (sub as any)?.unsubscribe?.(); } catch {}
+      try { (subActs as any)?.unsubscribe?.(); } catch {}
+    };
+  }, [id]);
+
+  const totals = useMemo(() => {
+    const value = leads.reduce((s, l) => s + (l.value || 0), 0);
+    const closedWon = leads.filter(l => l.status === "closed_won");
+    const closedWonValue = closedWon.reduce((s, l) => s + (l.value || 0), 0);
+    const rate = leads.length ? Math.round((closedWon.length / leads.length) * 100) : 0;
+    return { value, closedWonValue, rate };
+  }, [leads]);
+
+  const handleSaveLink = async () => {
+    if (!id || !linkInput.trim()) return;
+    setSavingLink(true);
+    setLinkStatus("idle");
+    try {
       const { error } = await updateProject(id, { link: linkInput.trim() });
       if (error) {
         setLinkStatus("error");
@@ -268,14 +264,14 @@ const ManagerProjectDetails = () => {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <DashboardSidebar role="manager" />
-      <main className="flex-1 p-2 sm:p-4 lg:p-8 pt-16 sm:pt-20 lg:pt-8 overflow-auto">
-        <div className="flex items-start justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
+      <main className="flex-1 p-4 lg:p-8 pt-20 sm:pt-16 lg:pt-8 overflow-auto">
+        <div className="flex items-start justify-between gap-4 mb-6">
           <div className="min-w-0">
-            <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+            <div className="flex items-center gap-3 mb-2">
               <div className="w-11 h-11 rounded-xl bg-purple-600 text-slate-900 flex items-center justify-center flex-shrink-0"><CalendarDays className="w-5 h-5"/></div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl md:text-3xl font-bold text-slate-900 truncate">{project.name}</h1>
+                  <h1 className="text-2xl md:text-3xl font-bold text-slate-900 truncate">{project.name}</h1>
                   <Button size="sm" variant="outline" className="ml-2" onClick={openEditProjectModal}>
                     Edit Project
                   </Button>
@@ -291,7 +287,7 @@ const ManagerProjectDetails = () => {
                     Delete Project
                   </Button>
                 </div>
-                <div className="text-slate-500 text-xs sm:text-sm whitespace-nowrap overflow-hidden text-ellipsis">{project.status || 'planned'} • Budget: {currency(project.budget || 0)}</div>
+                <div className="text-slate-500 text-sm whitespace-nowrap overflow-hidden text-ellipsis">{project.status || 'planned'} • Budget: {currency(project.budget || 0)}</div>
                 <div className="text-slate-500 text-xs whitespace-nowrap overflow-hidden text-ellipsis">{project.start_date || '-'} → {project.end_date || '-'}</div>
               </div>
             </div>
@@ -311,39 +307,39 @@ const ManagerProjectDetails = () => {
                 </div>
               )}
               {editProjectForm && (
-                <div className="flex flex-col gap-4 px-2 md:px-0">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 mb-4">
-                    <h2 className="text-xl font-bold">Project Details</h2>
-                    <div className="flex flex-col sm:flex-row gap-2 mt-2 md:mt-0">
-                      <button
-                        className="bg-green-500 text-white px-4 py-2 rounded text-base hover:bg-green-600 transition w-full sm:w-auto"
-                        onClick={() => setShowEditModal(true)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="bg-red-500 text-white px-4 py-2 rounded text-base hover:bg-red-600 transition w-full sm:w-auto"
-                        onClick={handleDelete}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded shadow p-4 flex flex-col gap-2">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-semibold text-lg break-words">{project?.name}</span>
-                      <span className="text-gray-500 text-sm break-words">{project?.description}</span>
-                    </div>
-                    {/* ...other details... */}
-                  </div>
-                  {showEditModal && project && (
-                    <EditProjectModal
-                      project={project}
-                      onClose={() => setShowEditModal(false)}
-                      onEdit={fetchProject}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-project-name">Project Name *</Label>
+                    <Input
+                      id="edit-project-name"
+                      value={editProjectForm.name}
+                      onChange={(e) => setEditProjectForm({ ...editProjectForm, name: e.target.value })}
+                      placeholder="Project Name"
                     />
-                  )}
-                </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-project-status">Status</Label>
+                    <Input
+                      id="edit-project-status"
+                      value={editProjectForm.status}
+                      onChange={(e) => setEditProjectForm({ ...editProjectForm, status: e.target.value })}
+                      placeholder="planned / in_progress / completed"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-project-budget">Budget (USD)</Label>
+                    <Input
+                      id="edit-project-budget"
+                      type="number"
+                      value={editProjectForm.budget}
+                      onChange={(e) => setEditProjectForm({ ...editProjectForm, budget: e.target.value })}
+                      placeholder="50000"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-project-start">Start Date</Label>
+                    <Input
+                      id="edit-project-start"
                       type="date"
                       value={editProjectForm.start_date}
                       onChange={(e) => setEditProjectForm({ ...editProjectForm, start_date: e.target.value })}

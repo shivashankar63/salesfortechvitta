@@ -58,13 +58,13 @@ const SalesmanDashboard = () => {
               <p className="text-sm text-slate-600">Track your pipeline and quota performance</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-              <div className="lg:col-span-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 col-span-1 sm:col-span-2 lg:col-span-3">
                 <SalesmanLeadsTable />
               </div>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               {/* <QuotaProgress /> */}
               {/* <ActivityTimeline /> */}
             </div>

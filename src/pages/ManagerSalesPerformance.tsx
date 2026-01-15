@@ -140,7 +140,7 @@ const ManagerSalesPerformance = () => {
         </div>
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="p-4 sm:p-6 bg-white border-slate-200 hover:shadow-md transition-all">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
