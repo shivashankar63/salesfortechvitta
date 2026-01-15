@@ -9,12 +9,65 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { getProjectById, getLeadsForProject, getActivities, subscribeToProjects, subscribeToActivities, updateProject, createLead } from "@/lib/supabase";
+import { getProjectById, getLeadsForProject, getActivities, subscribeToProjects, subscribeToActivities, updateProject, createLead, deleteProject } from "@/lib/supabase";
 import { ArrowLeft, CalendarDays, DollarSign, Target, TrendingUp, Clock, Mail, Phone, FileText, CheckCircle2, ExternalLink, Edit2, AlertCircle, Check, Upload } from "lucide-react";
 
 const currency = (n: number) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n || 0);
 
 const ManagerProjectDetails = () => {
+    const [showEditProjectModal, setShowEditProjectModal] = useState(false);
+    const [editProjectForm, setEditProjectForm] = useState<any>(null);
+    const [editingProject, setEditingProject] = useState(false);
+    const [editProjectMessage, setEditProjectMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+    // Open Edit Project modal with current project data
+    const openEditProjectModal = () => {
+      if (!project) return;
+      setEditProjectForm({
+        name: project.name || "",
+        status: project.status || "planned",
+        budget: project.budget || "",
+        start_date: project.start_date || "",
+        end_date: project.end_date || "",
+        description: project.description || "",
+      });
+      setEditProjectMessage(null);
+      setShowEditProjectModal(true);
+    };
+
+    // Handle Edit Project form submission
+    const handleEditProject = async () => {
+      setEditProjectMessage(null);
+      if (!editProjectForm.name) {
+        setEditProjectMessage({ type: "error", text: "Project name is required." });
+        return;
+      }
+      setEditingProject(true);
+      try {
+        const payload: any = {
+          name: editProjectForm.name,
+          status: editProjectForm.status,
+          budget: Number(editProjectForm.budget) || 0,
+          start_date: editProjectForm.start_date,
+          end_date: editProjectForm.end_date,
+          description: editProjectForm.description,
+        };
+        const { error } = await updateProject(id, payload);
+        if (error) throw new Error(error.message);
+        setEditProjectMessage({ type: "success", text: "Project updated successfully." });
+        // Refresh project data
+        const projRes = await getProjectById(id);
+        setProject(projRes.data);
+        setTimeout(() => {
+          setShowEditProjectModal(false);
+          setEditProjectForm(null);
+          setEditProjectMessage(null);
+        }, 1200);
+      } catch (err: any) {
+        setEditProjectMessage({ type: "error", text: err.message || "Failed to update project." });
+      } finally {
+        setEditingProject(false);
+      }
+    };
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -217,7 +270,23 @@ const ManagerProjectDetails = () => {
             <div className="flex items-center gap-3 mb-2">
               <div className="w-11 h-11 rounded-xl bg-purple-600 text-slate-900 flex items-center justify-center flex-shrink-0"><CalendarDays className="w-5 h-5"/></div>
               <div className="min-w-0">
-                <h1 className="text-2xl md:text-3xl font-bold text-slate-900 truncate">{project.name}</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl md:text-3xl font-bold text-slate-900 truncate">{project.name}</h1>
+                  <Button size="sm" variant="outline" className="ml-2" onClick={openEditProjectModal}>
+                    Edit Project
+                  </Button>
+                  <Button size="sm" variant="destructive" className="ml-2" onClick={async () => {
+                    if (!window.confirm('Are you sure you want to delete this project?')) return;
+                    try {
+                      await deleteProject(id);
+                      navigate(-1);
+                    } catch (err) {
+                      alert('Failed to delete project.');
+                    }
+                  }}>
+                    Delete Project
+                  </Button>
+                </div>
                 <div className="text-slate-500 text-sm whitespace-nowrap overflow-hidden text-ellipsis">{project.status || 'planned'} • Budget: {currency(project.budget || 0)}</div>
                 <div className="text-slate-500 text-xs whitespace-nowrap overflow-hidden text-ellipsis">{project.start_date || '-'} → {project.end_date || '-'}</div>
               </div>
@@ -225,6 +294,87 @@ const ManagerProjectDetails = () => {
           </div>
           <Button variant="outline" onClick={() => navigate(-1)}><ArrowLeft className="w-4 h-4 mr-2"/>Back</Button>
         </div>
+        {/* Edit Project Modal */}
+        <Dialog open={showEditProjectModal} onOpenChange={setShowEditProjectModal}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Project</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {editProjectMessage && (
+                <div className={editProjectMessage.type === "success" ? "bg-green-50 border-green-200 text-green-700 p-2 rounded" : "bg-red-50 border-red-200 text-red-700 p-2 rounded"}>
+                  {editProjectMessage.text}
+                </div>
+              )}
+              {editProjectForm && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-project-name">Project Name *</Label>
+                    <Input
+                      id="edit-project-name"
+                      value={editProjectForm.name}
+                      onChange={(e) => setEditProjectForm({ ...editProjectForm, name: e.target.value })}
+                      placeholder="Project Name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-project-status">Status</Label>
+                    <Input
+                      id="edit-project-status"
+                      value={editProjectForm.status}
+                      onChange={(e) => setEditProjectForm({ ...editProjectForm, status: e.target.value })}
+                      placeholder="planned / in_progress / completed"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-project-budget">Budget (USD)</Label>
+                    <Input
+                      id="edit-project-budget"
+                      type="number"
+                      value={editProjectForm.budget}
+                      onChange={(e) => setEditProjectForm({ ...editProjectForm, budget: e.target.value })}
+                      placeholder="50000"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-project-start">Start Date</Label>
+                    <Input
+                      id="edit-project-start"
+                      type="date"
+                      value={editProjectForm.start_date}
+                      onChange={(e) => setEditProjectForm({ ...editProjectForm, start_date: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-project-end">End Date</Label>
+                    <Input
+                      id="edit-project-end"
+                      type="date"
+                      value={editProjectForm.end_date}
+                      onChange={(e) => setEditProjectForm({ ...editProjectForm, end_date: e.target.value })}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Label htmlFor="edit-project-description">Description</Label>
+                    <Textarea
+                      id="edit-project-description"
+                      value={editProjectForm.description}
+                      onChange={(e) => setEditProjectForm({ ...editProjectForm, description: e.target.value })}
+                      placeholder="Project description..."
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditProjectModal(false)} disabled={editingProject}>Cancel</Button>
+              <Button onClick={handleEditProject} disabled={editingProject}>
+                {editingProject ? "Saving..." : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Project Link Section */}
         {project?.link && (

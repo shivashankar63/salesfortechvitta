@@ -1,4 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Card } from "@/components/ui/card";
@@ -62,12 +65,25 @@ const stageMeta: Record<StageKey, { label: string; color: string; description: s
   },
 };
 
+
 const SalesPipeline = () => {
   const [loading, setLoading] = useState(true);
   const [leads, setLeads] = useState<any[]>([]);
   const [selectedStage, setSelectedStage] = useState<StageKey>("new");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [formData, setFormData] = useState({
+    company_name: "",
+    contact_name: "",
+    contact_email: "",
+    contact_phone: "",
+    value: 0,
+    source: "",
+    status: "new",
+    description: "",
+  });
   const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,6 +94,7 @@ const SalesPipeline = () => {
           return;
         }
 
+        setCurrentUser(user);
         const { data: userData } = await getUserById(user.id);
         if (userData?.role !== 'salesman') {
           const roleRoutes = { owner: '/owner', manager: '/manager' };
@@ -95,6 +112,38 @@ const SalesPipeline = () => {
     };
     fetchData();
   }, [navigate]);
+
+  const handleAddLead = async () => {
+    try {
+      const { createLead } = await import("@/lib/supabase");
+      let leadData = { ...formData };
+      if (currentUser) {
+        leadData.assigned_to = currentUser.id;
+      }
+      const { data, error } = await createLead(leadData as any);
+      if (!error) {
+        alert("Lead added successfully!");
+        setShowAddModal(false);
+        setFormData({
+          company_name: "",
+          contact_name: "",
+          contact_email: "",
+          contact_phone: "",
+          value: 0,
+          source: "",
+          status: "new",
+          description: "",
+        });
+        // Refresh leads
+        const { data: leadsData } = await getLeads(currentUser ? { assignedTo: currentUser.id } : undefined);
+        if (leadsData) setLeads(leadsData);
+      } else {
+        alert("Failed to add lead");
+      }
+    } catch (err) {
+      alert("Failed to add lead");
+    }
+  };
 
   const stages = useMemo(() => {
     const grouped: Record<StageKey, { leads: any[]; value: number }> = {
@@ -175,11 +224,78 @@ const SalesPipeline = () => {
           </div>
         ) : (
           <>
-            {/* Header with Stats */}
+            {/* Header with Stats and Add Lead button */}
             <div className="mb-6">
-              <h1 className="text-2xl font-bold text-slate-900 mb-4">Sales Pipeline</h1>
-              
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h1 className="text-2xl font-bold text-slate-900">Sales Pipeline</h1>
+                <Button className="bg-blue-700 text-white hover:bg-blue-800 w-full sm:w-auto" onClick={() => setShowAddModal(true)}>
+                  Add Lead
+                </Button>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                            {/* Add Lead Modal */}
+                            <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+                              <DialogContent className="bg-white max-w-lg">
+                                <DialogHeader>
+                                  <DialogTitle>Add New Lead</DialogTitle>
+                                  <DialogDescription>Enter the details for the new lead</DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-2">
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label>Company Name</Label>
+                                      <Input value={formData.company_name} onChange={e => setFormData({ ...formData, company_name: e.target.value })} />
+                                    </div>
+                                    <div>
+                                      <Label>Contact Name</Label>
+                                      <Input value={formData.contact_name} onChange={e => setFormData({ ...formData, contact_name: e.target.value })} />
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label>Email</Label>
+                                      <Input type="email" value={formData.contact_email} onChange={e => setFormData({ ...formData, contact_email: e.target.value })} />
+                                    </div>
+                                    <div>
+                                      <Label>Phone</Label>
+                                      <Input value={formData.contact_phone} onChange={e => setFormData({ ...formData, contact_phone: e.target.value })} />
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label>Value</Label>
+                                      <Input type="number" value={formData.value} onChange={e => setFormData({ ...formData, value: parseInt(e.target.value) || 0 })} />
+                                    </div>
+                                    <div>
+                                      <Label>Source</Label>
+                                      <Input value={formData.source} onChange={e => setFormData({ ...formData, source: e.target.value })} placeholder="Website, Referral, etc." />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label>Status</Label>
+                                    <Select value={formData.status} onValueChange={value => setFormData({ ...formData, status: value })}>
+                                      <SelectTrigger>
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="new">New</SelectItem>
+                                        <SelectItem value="qualified">Qualified</SelectItem>
+                                        <SelectItem value="proposal">Proposal Sent</SelectItem>
+                                        <SelectItem value="closed_won">Closed</SelectItem>
+                                        <SelectItem value="not_interested">Archived</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div>
+                                    <Label>Description</Label>
+                                    <Input value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+                                  </div>
+                                  <div className="flex justify-end pt-2">
+                                    <Button className="bg-blue-700 text-white hover:bg-blue-800" onClick={handleAddLead}>Add Lead</Button>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
                 <Card className="border-slate-200 bg-white p-4">
                   <div className="flex items-center justify-between">
                     <div>
