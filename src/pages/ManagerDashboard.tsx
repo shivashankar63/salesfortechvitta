@@ -31,10 +31,19 @@ const ManagerDashboard = () => {
         }
 
         const { data: userData } = await getUserById(user.id);
-        const role = String(userData?.role || '').toLowerCase();
+        if (!userData) {
+          navigate('/login', { replace: true });
+          return;
+        }
+        const role = String(userData.role || '').toLowerCase().trim();
+        
+        // Only allow manager role to access this dashboard
         if (role !== 'manager') {
-          const roleRoutes = { owner: '/owner', salesman: '/salesman' };
-          navigate(roleRoutes[role as 'owner' | 'salesman'] || '/login', { replace: true });
+          const roleRoutes: Record<string, string> = { 
+            owner: '/owner',
+            salesman: '/salesman'
+          };
+          navigate(roleRoutes[role] || '/login', { replace: true });
           return;
         }
 
@@ -97,7 +106,7 @@ const ManagerDashboard = () => {
   const totalPipeline = leads.filter(l => ['new', 'qualified', 'proposal'].includes(normalizeStatus(l.status))).reduce((sum, l) => sum + (l.value || 0), 0);
   const winRate = totalLeads > 0 ? Math.round((wonLeads / totalLeads) * 100) : 0;
 
-if (loading) {
+  if (loading) {
     return (
       <div className="flex min-h-screen bg-slate-50">
         <DashboardSidebar role="manager" />

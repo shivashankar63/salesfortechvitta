@@ -32,6 +32,7 @@ import Analytics from "./pages/Analytics";
 import Regions from "./pages/Regions";
 import RevenueReports from "./pages/RevenueReports";
 import NotFound from "./pages/NotFound";
+import WhoAmI from "./pages/WhoAmI";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/owner" element={<OwnerDashboard />} />
           <Route path="/manager" element={<ManagerDashboard />} />
+          <Route path="/whoami" element={<WhoAmI />} />
           <Route path="/salesman" element={<SalesmanDashboard />} />
           <Route path="/manager/leads" element={<ManagerLeads />} />
           <Route path="/manager/sales" element={<ManagerSales />} />

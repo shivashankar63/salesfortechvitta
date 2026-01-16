@@ -17,25 +17,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     const checkAuth = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        
-        if (user) {
-          // Fetch user role and redirect
-          const { data } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', user.id)
-            .single();
-          
-          if (data) {
-            const role = String(data.role || '').toLowerCase() as UserRole;
-            const dashboardRoute = {
-              owner: '/owner',
-              manager: '/manager',
-              salesman: '/salesman',
-            };
-            navigate(dashboardRoute[role] || '/login', { replace: true });
-          }
-        }
+        // TEMP: Do not redirect, just allow access for debugging
       } catch (error) {
         console.error("Error checking authentication:", error);
       } finally {

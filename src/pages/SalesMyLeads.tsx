@@ -53,10 +53,14 @@ const SalesMyLeads = () => {
         }
 
         const { data: userData } = await getUserById(user.id);
-        const role = String(userData?.role || '').toLowerCase();
+        if (!userData) {
+          navigate('/login', { replace: true });
+          return;
+        }
+        const role = String(userData.role || '').toLowerCase().trim();
         if (role !== 'salesman') {
-          const roleRoutes = { owner: '/owner', manager: '/manager' };
-          navigate(roleRoutes[role as 'owner' | 'manager'] || '/login', { replace: true });
+          const roleRoutes: Record<string, string> = { owner: '/owner', manager: '/manager' };
+          navigate(roleRoutes[role] || '/login', { replace: true });
           return;
         }
 

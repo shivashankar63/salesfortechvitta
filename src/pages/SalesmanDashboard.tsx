@@ -19,12 +19,21 @@ const SalesmanDashboard = () => {
           navigate('/login', { replace: true });
           return;
         }
-        
+
         const { data: userData } = await getUserById(currentUser.id);
-        const role = String(userData?.role || '').toLowerCase();
+        if (!userData) {
+          navigate('/login', { replace: true });
+          return;
+        }
+        const role = String(userData.role || '').toLowerCase().trim();
+        
+        // Only allow salesman role to access this dashboard
         if (role !== 'salesman') {
-          const roleRoutes = { owner: '/owner', manager: '/manager' };
-          navigate(roleRoutes[role as 'owner' | 'manager'] || '/login', { replace: true });
+          const roleRoutes: Record<string, string> = { 
+            owner: '/owner',
+            manager: '/manager'
+          };
+          navigate(roleRoutes[role] || '/login', { replace: true });
           return;
         }
       } catch (error) {

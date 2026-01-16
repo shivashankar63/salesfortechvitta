@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Plus, Loader, CheckCircle, Clock, XCircle, AlertCircle, Filter, Search, Download, Mail, Phone as PhoneIcon, Briefcase } from "lucide-react";
+import { Plus, Loader, CheckCircle, Clock, XCircle, AlertCircle, Filter, Search, Mail, Phone as PhoneIcon, Briefcase } from "lucide-react";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ const ManagerLeads = () => {
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [leads, setLeads] = useState<any[]>([]);
   const [salesUsers, setSalesUsers] = useState<any[]>([]);
+  const [debugInfo, setDebugInfo] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [assigneeFilter, setAssigneeFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -125,6 +126,7 @@ const ManagerLeads = () => {
 
         setProjects(allProjects);
         setSalesUsers(salespeople);
+        setDebugInfo(`leads.length=${leads.length} leads=${JSON.stringify(leads)}`);
 
         // If a status filter is set in the URL, set project filter to 'all' (show all projects)
         if (searchParams.get("status")) {
@@ -456,8 +458,13 @@ const ManagerLeads = () => {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <DashboardSidebar role="manager" />
-      
-      <main className="flex-1 p-2 sm:p-4 lg:p-8 pt-20 sm:pt-16 lg:pt-8 overflow-auto">
+      <main className="flex-1 p-2 sm:p-4 lg:p-8 pt-16 sm:pt-16 lg:pt-8 overflow-auto bg-slate-50">
+        {/* Debug Info Banner */}
+        {debugInfo && (
+          <div style={{background:'#fffbe6',color:'#333',padding:'1rem',marginBottom:'1rem',border:'2px solid #ffe58f',borderRadius:'8px',fontSize:'1rem'}}>
+            <strong>DEBUG:</strong> {debugInfo}
+          </div>
+        )}
         <div className="mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-2xl font-bold text-slate-900 mb-1 sm:mb-2">Leads Management</h1>
           <p className="text-sm sm:text-base text-slate-600">Manage and track all leads across projects</p>
@@ -604,7 +611,7 @@ const ManagerLeads = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors">
-                    <Download className="w-4 h-4 text-green-600" />
+                    {/* Download icon removed */}
                     <div className="flex items-baseline gap-1">
                       <span className="text-lg font-bold text-green-700">${(totalValue / 1000).toFixed(0)}K</span>
                       <span className="text-xs text-green-700 font-medium">Value</span>
@@ -688,7 +695,7 @@ const ManagerLeads = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors">
-                    <Download className="w-4 h-4 text-green-600" />
+                    {/* Download icon removed */}
                     <div className="flex items-baseline gap-1">
                       <span className="text-lg font-bold text-green-700">${(totalValue / 1000).toFixed(0)}K</span>
                       <span className="text-xs text-green-700 font-medium">Value</span>
@@ -968,116 +975,6 @@ const ManagerLeads = () => {
             </DialogHeader>
             {selectedLead && (
               <div className="space-y-6">
-                        {/* Edit Lead Modal */}
-                        <Dialog open={showEditLeadModal} onOpenChange={setShowEditLeadModal}>
-                          <DialogContent className="sm:max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>Edit Lead</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-4">
-                              {editMessage && (
-                                <Alert className={editMessage.type === "success" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}>
-                                  <AlertDescription className={editMessage.type === "success" ? "text-green-700" : "text-red-700"}>
-                                    {editMessage.text}
-                                  </AlertDescription>
-                                </Alert>
-                              )}
-                              {editLeadForm && (
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label htmlFor="edit-company">Company Name *</Label>
-                                    <Input
-                                      id="edit-company"
-                                      value={editLeadForm.company_name}
-                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, company_name: e.target.value })}
-                                      placeholder="Acme Corp"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="edit-contact">Contact Name *</Label>
-                                    <Input
-                                      id="edit-contact"
-                                      value={editLeadForm.contact_name}
-                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, contact_name: e.target.value })}
-                                      placeholder="John Doe"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="edit-email">Email</Label>
-                                    <Input
-                                      id="edit-email"
-                                      type="email"
-                                      value={editLeadForm.email}
-                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, email: e.target.value })}
-                                      placeholder="john@acme.com"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="edit-phone">Phone</Label>
-                                    <Input
-                                      id="edit-phone"
-                                      value={editLeadForm.phone}
-                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, phone: e.target.value })}
-                                      placeholder="+1-555-0000"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="edit-value">Deal Value (USD) *</Label>
-                                    <Input
-                                      id="edit-value"
-                                      type="number"
-                                      value={editLeadForm.value}
-                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, value: e.target.value })}
-                                      placeholder="50000"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="edit-status">Status</Label>
-                                    <Select value={editLeadForm.status} onValueChange={(value) => setEditLeadForm({ ...editLeadForm, status: value })}>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select status" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="new">New</SelectItem>
-                                        <SelectItem value="qualified">Qualified</SelectItem>
-                                        <SelectItem value="proposal">Proposal</SelectItem>
-                                        <SelectItem value="closed_won">Closed Won</SelectItem>
-                                        <SelectItem value="not_interested">Not Interested</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  <div className="col-span-2">
-                                    <Label htmlFor="edit-description">Notes / Description</Label>
-                                    <Textarea
-                                      id="edit-description"
-                                      value={editLeadForm.description}
-                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, description: e.target.value })}
-                                      placeholder="Add any additional notes about this lead..."
-                                      rows={3}
-                                    />
-                                  </div>
-                                  <div className="col-span-2">
-                                    <Label htmlFor="edit-link">Company Website / Link</Label>
-                                    <Input
-                                      id="edit-link"
-                                      type="url"
-                                      value={editLeadForm.link}
-                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, link: e.target.value })}
-                                      placeholder="https://example.com"
-                                    />
-                                    <div className="text-xs text-slate-500 mt-1">Enter the company website or relevant link</div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                            <DialogFooter>
-                              <Button variant="outline" onClick={() => setShowEditLeadModal(false)} disabled={editing}>Cancel</Button>
-                              <Button onClick={handleEditLead} disabled={editing}>
-                                {editing ? "Saving..." : "Save Changes"}
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
                 {/* Header Section */}
                 <div className="pb-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg">
                   <div className="flex items-start justify-between gap-4 mb-3">
@@ -1218,6 +1115,117 @@ const ManagerLeads = () => {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Lead Modal */}
+        <Dialog open={showEditLeadModal} onOpenChange={setShowEditLeadModal}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Lead</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {editMessage && (
+                <Alert className={editMessage.type === "success" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}>
+                  <AlertDescription className={editMessage.type === "success" ? "text-green-700" : "text-red-700"}>
+                    {editMessage.text}
+                  </AlertDescription>
+                </Alert>
+              )}
+              {editLeadForm && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-company">Company Name *</Label>
+                    <Input
+                      id="edit-company"
+                      value={editLeadForm.company_name}
+                      onChange={(e) => setEditLeadForm({ ...editLeadForm, company_name: e.target.value })}
+                      placeholder="Acme Corp"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-contact">Contact Name *</Label>
+                    <Input
+                      id="edit-contact"
+                      value={editLeadForm.contact_name}
+                      onChange={(e) => setEditLeadForm({ ...editLeadForm, contact_name: e.target.value })}
+                      placeholder="John Doe"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-email">Email</Label>
+                    <Input
+                      id="edit-email"
+                      type="email"
+                      value={editLeadForm.email}
+                      onChange={(e) => setEditLeadForm({ ...editLeadForm, email: e.target.value })}
+                      placeholder="john@acme.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-phone">Phone</Label>
+                    <Input
+                      id="edit-phone"
+                      value={editLeadForm.phone}
+                      onChange={(e) => setEditLeadForm({ ...editLeadForm, phone: e.target.value })}
+                      placeholder="+1-555-0000"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-value">Deal Value (USD) *</Label>
+                    <Input
+                      id="edit-value"
+                      type="number"
+                      value={editLeadForm.value}
+                      onChange={(e) => setEditLeadForm({ ...editLeadForm, value: e.target.value })}
+                      placeholder="50000"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-status">Status</Label>
+                    <Select value={editLeadForm.status} onValueChange={(value) => setEditLeadForm({ ...editLeadForm, status: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="qualified">Qualified</SelectItem>
+                        <SelectItem value="proposal">Proposal</SelectItem>
+                        <SelectItem value="closed_won">Closed Won</SelectItem>
+                        <SelectItem value="not_interested">Not Interested</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-2">
+                    <Label htmlFor="edit-description">Notes / Description</Label>
+                    <Textarea
+                      id="edit-description"
+                      value={editLeadForm.description}
+                      onChange={(e) => setEditLeadForm({ ...editLeadForm, description: e.target.value })}
+                      placeholder="Add any additional notes about this lead..."
+                      rows={3}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Label htmlFor="edit-link">Company Website / Link</Label>
+                    <Input
+                      id="edit-link"
+                      type="url"
+                      value={editLeadForm.link}
+                      onChange={(e) => setEditLeadForm({ ...editLeadForm, link: e.target.value })}
+                      placeholder="https://example.com"
+                    />
+                    <div className="text-xs text-slate-500 mt-1">Enter the company website or relevant link</div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditLeadModal(false)} disabled={editing}>Cancel</Button>
+              <Button onClick={handleEditLead} disabled={editing}>
+                {editing ? "Saving..." : "Save Changes"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </main>

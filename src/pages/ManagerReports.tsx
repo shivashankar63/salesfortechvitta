@@ -1,7 +1,7 @@
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, BarChart3, FileText } from "lucide-react";
+import { BarChart3, FileText } from "lucide-react";
 
 const reports = [
   { name: "Weekly Pipeline", period: "This Week", size: "1.2 MB" },
@@ -17,10 +17,10 @@ const ManagerReports = () => {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">Reports</h1>
-            <p className="text-slate-500">Download weekly and monthly summaries</p>
+            <p className="text-slate-500">Weekly and monthly summaries</p>
           </div>
           <Button className="bg-purple-600 hover:bg-purple-700 text-slate-900 gap-2">
-            <Download className="w-4 h-4" /> Export All
+            {/* Download icon removed */} Export All
           </Button>
         </div>
 
@@ -39,7 +39,7 @@ const ManagerReports = () => {
               <div className="flex items-center justify-between text-sm text-slate-600">
                 <span>Size: {report.size}</span>
                 <Button variant="outline" className="bg-white/5 text-slate-900 border-white/10 hover:bg-white/10 gap-2">
-                  <FileText className="w-4 h-4" /> Download
+                  <FileText className="w-4 h-4" />
                 </Button>
               </div>
             </Card>

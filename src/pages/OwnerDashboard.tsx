@@ -64,10 +64,14 @@ const OwnerDashboard = () => {
         }
         
         const { data: userData } = await getUserById(currentUser.id);
-        const role = String(userData?.role || '').toLowerCase();
+        if (!userData) {
+          navigate('/login', { replace: true });
+          return;
+        }
+        const role = String(userData.role || '').toLowerCase().trim();
         if (role !== 'owner') {
-          const roleRoutes = { manager: '/manager', salesman: '/salesman' };
-          navigate(roleRoutes[role as 'manager' | 'salesman'] || '/login', { replace: true });
+          const roleRoutes: Record<string, string> = { manager: '/manager', salesman: '/salesman' };
+          navigate(roleRoutes[role] || '/login', { replace: true });
           return;
         }
 

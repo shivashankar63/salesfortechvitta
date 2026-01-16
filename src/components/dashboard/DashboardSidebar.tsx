@@ -77,6 +77,7 @@ const DashboardSidebar = ({ role }: SidebarProps) => {
   const normalizedRole = String(role || 'salesman').toLowerCase() as "owner" | "manager" | "salesman";
   const menuItems = getMenuItems(normalizedRole);
 
+  // Always use normalizedRole for labels/colors
   const roleLabels = {
     owner: "Owner",
     manager: "Manager",
@@ -149,7 +150,7 @@ const DashboardSidebar = ({ role }: SidebarProps) => {
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm",
                     isActive
-                      ? `${roleColors[role]} text-white shadow-sm`
+                      ? `${roleColors[normalizedRole]} text-white shadow-sm`
                       : "text-slate-700 hover:text-slate-900 hover:bg-slate-100",
                     isCollapsed && "justify-center"
                   )}
@@ -174,7 +175,7 @@ const DashboardSidebar = ({ role }: SidebarProps) => {
               )}
             >
               <Avatar className="w-10 h-10">
-                <AvatarFallback className={`${roleColors[role]} text-white font-medium`}>
+                <AvatarFallback className={`${roleColors[normalizedRole]} text-white font-medium`}>
                   JD
                 </AvatarFallback>
               </Avatar>
@@ -182,7 +183,7 @@ const DashboardSidebar = ({ role }: SidebarProps) => {
                 <>
                   <div className="flex-1 text-left">
                     <p className="text-sm font-medium text-slate-900">{userEmail}</p>
-                    <p className="text-xs text-slate-600">{roleLabels[role]}</p>
+                    <p className="text-xs text-slate-600">{roleLabels[normalizedRole]}</p>
                   </div>
                   <ChevronDown className="w-4 h-4 text-slate-600" />
                 </>

@@ -1,6 +1,6 @@
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DollarSign, TrendingUp, Calendar, Download, Filter } from "lucide-react";
+import { DollarSign, TrendingUp, Calendar, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { getLeads, getUsers } from "@/lib/supabase";
@@ -91,27 +91,13 @@ const RevenueReports = () => {
   const handleExport = () => {
     const csv = [
       ['Metric', 'Value'],
-      ['Total Revenue', `$${totalRevenue.toLocaleString()}`],
-      ['Total Target', `$${totalTarget.toLocaleString()}`],
-      ['Total Deals', totalDeals.toString()],
-      ['Avg Deal Size', `$${avgDealSize.toFixed(0)}`],
-      ['',''],
-      ['Top Performers', ''],
-      ['Name', 'Revenue', 'Deals', 'Quota', 'Achievement'],
       ...topPerformers.map(p => [p.name, p.revenue, p.deals, p.quota, `${p.achievement}%`])
     ].map(row => row.join(',')).join('\\n');
     
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `revenue-report-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
   };
-  const totalRevenue = monthlyData.reduce((sum, m) => sum + m.revenue, 0);
-  const totalTarget = monthlyData.reduce((sum, m) => sum + m.target, 0);
-  const totalDeals = monthlyData.reduce((sum, m) => sum + m.deals, 0);
-  const avgDealSize = totalRevenue / totalDeals;
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -139,7 +125,6 @@ const RevenueReports = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button onClick={handleExport} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
-                <Download className="w-4 h-4" />
                 Export Report
               </Button>
             </div>
